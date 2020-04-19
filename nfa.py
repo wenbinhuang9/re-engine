@@ -4,32 +4,36 @@ EPSILON = "epsilon"
 
 from nfa import EPSILON
 
+## simulate the searching word on NFA
+def simulate(nfa, word, start = 0, isfullmatch=True):
 
-def simulate(nfa, word):
+    return __simulate(nfa, word, nfa.start, start, len(word), isfullmatch)
 
-    return __simulate(nfa, word, nfa.start)
+## return the
+def __simulate(nfa, input, q, start,end, isfullmatch):
+    if not isfullmatch and nfa.isAcceptState(q):
+        return start
 
-def __simulate(nfa, input, q):
-    if len(input) == 0:
-        return nfa.isAcceptState(q)
+    if start == end:
+        return end if nfa.isAcceptState(q) else -1
 
-    s = input[0]
+    s = input[start]
     nextstates = nfa.nextState(q, s)
 
     if nextstates != None:
         for next in nextstates:
-            ans = __simulate(nfa, input[1:], next)
-            if ans == True:
-                return True
+            ans = __simulate(nfa, input, next, start + 1, end, isfullmatch)
+            if ans != -1:
+                return ans
 
     nextstates = nfa.nextState(q, EPSILON)
     if nextstates != None:
         for next in nextstates:
-            ans = __simulate(nfa, input, next)
-            if ans == True:
-                return True
+            ans = __simulate(nfa, input, next,start, end, isfullmatch)
+            if ans != -1:
+                return ans
 
-    return False
+    return -1
 
 class NFA():
     def __init__(self):
@@ -49,7 +53,6 @@ class NFA():
         self.states.update(nfa.states)
 
         return self
-
 
     def startState(self, start):
 
@@ -86,18 +89,6 @@ class NFA():
         next = self.transitions[(q, s)]
 
         return next
-    def match(self, word, left = 0, right = None):
-        if right == None:
-            word = word[left:]
-        else:
-            word = word[left : right]
-
-        return simulate(self, word)
-
-
-    def find(self):
-        pass
-
 
 
 
